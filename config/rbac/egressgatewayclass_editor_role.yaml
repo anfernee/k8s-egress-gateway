@@ -1,0 +1,24 @@
+# permissions for end users to edit egressgatewayclasses.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: egressgatewayclass-editor-role
+rules:
+- apiGroups:
+  - networking.x-k8s.io
+  resources:
+  - egressgatewayclasses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networking.x-k8s.io
+  resources:
+  - egressgatewayclasses/status
+  verbs:
+  - get

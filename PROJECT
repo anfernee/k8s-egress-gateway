@@ -1,0 +1,13 @@
+domain: x-k8s.io
+repo: github.com/anfernee/k8s-egress-gateway
+resources:
+- group: networking
+  kind: EgressGatewayClass
+  version: v1alpha1
+- group: networking
+  kind: EgressGateway
+  version: v1alpha1
+- group: networking
+  kind: TCPRoute
+  version: v1alpha1
+version: "2"

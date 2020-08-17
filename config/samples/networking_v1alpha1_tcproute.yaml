@@ -1,0 +1,7 @@
+apiVersion: networking.x-k8s.io/v1alpha1
+kind: TCPRoute
+metadata:
+  name: tcproute-sample
+spec:
+  # Add fields here
+  foo: bar

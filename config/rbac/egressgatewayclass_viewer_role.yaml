@@ -1,0 +1,20 @@
+# permissions for end users to view egressgatewayclasses.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: egressgatewayclass-viewer-role
+rules:
+- apiGroups:
+  - networking.x-k8s.io
+  resources:
+  - egressgatewayclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.x-k8s.io
+  resources:
+  - egressgatewayclasses/status
+  verbs:
+  - get
