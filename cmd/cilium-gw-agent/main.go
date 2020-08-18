@@ -12,6 +12,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// cilium egress gateway agent work with cilium-agent on the host to
+// provide the egress gateway support
+
 package main
 
 import (
@@ -25,7 +28,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	networkingv1alpha1 "github.com/anfernee/k8s-egress-gateway/api/v1alpha1"
-	"github.com/anfernee/k8s-egress-gateway/controllers"
+	"github.com/anfernee/k8s-egress-gateway/pkg/cilium/ipmasq"
+	"github.com/anfernee/k8s-egress-gateway/pkg/controllers/cilium"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -42,12 +46,14 @@ func init() {
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
+	var (
+		metricsAddr       string
+		ipMasqAgentConfig string
+	)
+
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
-		"Enable leader election for controller manager. "+
-			"Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&ipMasqAgentConfig, "ip-masq-agent-config", "/etc/ip-masq-agent.yaml", "The path to ip-masq-agent config file")
+
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
@@ -56,39 +62,23 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
-		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   "8225b4e0.x-k8s.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	if err = (&controllers.EgressGatewayClassReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("EgressGatewayClass"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "EgressGatewayClass")
-		os.Exit(1)
-	}
-	if err = (&controllers.EgressGatewayReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("EgressGateway"),
-		Scheme: mgr.GetScheme(),
+	ipmasqAgent := ipmasq.New(ipMasqAgentConfig)
+
+	if err = (&cilium.EgressGatewayReconciler{
+		Client:      mgr.GetClient(),
+		Log:         ctrl.Log.WithName("controllers").WithName("EgressGateway"),
+		Scheme:      mgr.GetScheme(),
+		IPMasqAgent: ipmasqAgent,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "EgressGateway")
 		os.Exit(1)
 	}
-	if err = (&controllers.TCPRouteReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("TCPRoute"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "TCPRoute")
-		os.Exit(1)
-	}
-	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
