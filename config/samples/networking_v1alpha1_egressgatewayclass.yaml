@@ -1,7 +1,6 @@
 apiVersion: networking.x-k8s.io/v1alpha1
 kind: EgressGatewayClass
 metadata:
-  name: egressgatewayclass-sample
+  name: cilium-egressgatewayclass
 spec:
-  # Add fields here
-  foo: bar
+  controller: "cilium.io/egress-controller"

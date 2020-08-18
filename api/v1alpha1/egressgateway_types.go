@@ -1,5 +1,5 @@
 /*
-
+Copyright 2020 The Kubernetes authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,11 +25,14 @@ import (
 
 // EgressGatewaySpec defines the desired state of EgressGateway
 type EgressGatewaySpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Class used for this Gateway. This is the name of a GatewayClass resource.
+	Class string `json:"class" protobuf:"bytes,1,opt,name=class"`
 
-	// Foo is an example field of EgressGateway. Edit EgressGateway_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// NonMasqueradeCIDRs is the CIDRs that are not masquerated by CNI.
+	NonMasqueradeCIDRs []string `json:"nonMasqueradeCIDRs" protobuf:"bytes,2,rep,name=nonMasqueradeCIDRs"`
+
+	// MasqueradeIP is the SNAT IP for cluster external traffic+
+	MasqueradeIP string `json:"masqueradeIP" protobuf:"bytes,2,opt,name=masqueradeIP"`
 }
 
 // EgressGatewayStatus defines the observed state of EgressGateway

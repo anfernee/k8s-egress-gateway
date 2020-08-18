@@ -1,5 +1,5 @@
 /*
-
+Copyright 2020 The Kubernetes authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@ import (
 
 // EgressGatewayClassSpec defines the desired state of EgressGatewayClass
 type EgressGatewayClassSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of EgressGatewayClass. Edit EgressGatewayClass_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Controller is a string that indicates the controller that manages the gateway class
+	// +required
+	Controller string `json:"controller" protobuf:"bytes,1,opt,name=controller"`
 }
 
 // EgressGatewayClassStatus defines the observed state of EgressGatewayClass
@@ -47,6 +46,39 @@ type EgressGatewayClass struct {
 
 	Spec   EgressGatewayClassSpec   `json:"spec,omitempty"`
 	Status EgressGatewayClassStatus `json:"status,omitempty"`
+}
+
+// RouteNamespaces is used by Gateway and GatewayClass to indicate which
+// namespaces Routes should be selected from.
+type RouteNamespaces struct {
+	// NamespaceSelector is a selector of namespaces that Routes should be
+	// selected from. This is a standard Kubernetes LabelSelector, a label query
+	// over a set of resources. The result of matchLabels and matchExpressions
+	// are ANDed. Controllers must not support Routes in namespaces outside this
+	// selector.
+	//
+	// An empty selector (default) indicates that Routes in any namespace can be
+	// selected.
+	//
+	// The OnlySameNamespace field takes precedence over this field. This
+	// selector will only take effect when OnlySameNamespace is false.
+	//
+	// Support: Core
+	//
+	// +optional
+	NamespaceSelector metav1.LabelSelector `json:"namespaceSelector" protobuf:"bytes,1,opt,name=namespaceSelector"`
+
+	// OnlySameNamespace is a boolean used to indicate if Route references are
+	// limited to the same Namespace as the Gateway. When true, only Routes
+	// within the same Namespace as the Gateway should be selected.
+	//
+	// This field takes precedence over the NamespaceSelector field. That
+	// selector should only take effect when this field is set to false.
+	//
+	// Support: Core
+	//
+	// +optional
+	OnlySameNamespace bool `json:"onlySameNamespace" protobuf:"bytes,2,opt,name=onlySameNamespace"`
 }
 
 // +kubebuilder:object:root=true

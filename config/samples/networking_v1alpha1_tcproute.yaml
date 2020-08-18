@@ -3,5 +3,4 @@ kind: TCPRoute
 metadata:
   name: tcproute-sample
 spec:
-  # Add fields here
-  foo: bar
+  rules: []

@@ -1,7 +1,10 @@
 apiVersion: networking.x-k8s.io/v1alpha1
 kind: EgressGateway
 metadata:
-  name: egressgateway-sample
+  name: egressgateway
 spec:
-  # Add fields here
-  foo: bar
+  class: cilium-egressgatewayclass
+  nonMasqueradeCIDRs:
+  - 10.0.0.0/8
+  masqueradeIP: 192.168.0.100
+
